@@ -1,0 +1,106 @@
+==================
+Setup Instructions
+==================
+
+1. Locate the touchRecorder folder (most likely in Downloads).
+2. Navigate to the touchRecorder folder using the cd command
+    $ cd ~/Downloads/touchRecorder
+3. Create the executable using the make command
+    $ make
+4. To run the executable touchRecorder, use:
+    $ ./touchRecorder
+The data will display to the terminal window. To quit, input q (press q then enter). To force-quit, press ctrl and C simultaneously.
+
+5. To run and save the results of a run to an external file:
+    $ ./touchRecorder > outputFileName.txt
+Note that no output will appear in the terminal window. It is still saving to the specified file, so remember to quit the program!
+
+WARNING: This will save a LOT of data (several kilobytes within several seconds). Run this script for only a couple of minutes at a time to avoid running out of disk space.
+
+NOTE: If you cannot run the executable touchRecorder, use
+    $ chmod u+x touchRecorder
+    to change the permissions on the file
+
+
+==============
+Documentation:
+==============
+MTTouch Struct Explanation:
+
+typedef struct {
+    int frame;  
+        /*
+        0 when the script is started
+        1 frame = .008 seconds, i.e. 1 second = 125 frames
+        */
+    double timestamp; 
+        /* Unsure of starting point of this one. Perhaps when the computer was booted up?
+        Measured in seconds 
+        Looks like touchpad is able to record touches at 0.008 second intervals
+
+        */
+    int pathIndex;  // "P" (~transducerIndex)
+        /*
+        still need to investigate
+        */
+    int state;
+    int fingerID;   // "F" (~identity), used to differentiate touches on the trackpad
+    int handID;     // "H" (always 1)
+    MTVector normalizedVector;
+        /*
+        normalized position value ranges from (0,0)(x,y) in the bottom left corner to (1, 1) in the top right corner
+
+        3 decimal place precision seems sufficient. Additional sig figs don't come from measuring precision, but from normalization calculations.
+
+        See absoluteVector below
+        */
+    float zTotal;       // "ZTot" (~quality)
+        /*
+        looks like this corresponds to touch pressure! further testing required
+        */
+    int field9;     // always 0
+    float angle;
+    float majorAxis;    //can be used to deduce ellipse size
+    float minorAxis;
+        /*
+        majorAxis and minorAxis of the ellipse that approximates each touch
+        - grain size: 0.010 
+        - Looks like a regular finger touch will have dimensions of roughly 8x8
+        - by laying my finger down on the trackpad to increase the surface area, I was able to make a (22x8) ellipse
+        - don't think it will be feasible to deduce pressure from ellipse measurements; I recorded data for a single click using the trackpad. Change in ellipse area was negligible, and fluctuations between size measurements were significant enough that no clear trend in ellipse size could be seen
+
+        */
+    MTVector absoluteVector;    // "mm"
+        /*
+        example entry:
+        Frame:     128; NPos( 0.822,  0.756); APos(35.340, 50.970); NVel( 3.561,  2.858); AVel(362.250, 200.250)
+
+        absPos is measured with grain size 0.010
+        - for my trackpad:
+        bottom left corner is ~(-48, -2)
+        top right corner is ~(+53, +68)
+        - very non-intuitive
+        - (0,0) is not in the bottom center of my trackpad but it's close
+
+        - Note that normalizedVector normalizes this into 
+        normPos:
+        bottom left: (0, 0)
+        top right: (1, 1)
+
+        absVel:
+        - a still finger still gives nonzero absolute velocity readings of magnitude < 10
+        - a slowly moving finger gives absolute velocity readings of magnitude > 50
+        - a normal swipe speed gives absolute velocity readings of velocity ~100
+        - these readings are not very continuous - readings from a single smooth motion still fluctuate by ~10 units between each touch reading
+
+
+        */
+    int field14;    // always 0
+    int field15;    // always 0
+    float zDensity;     // "ZDen" (~density)
+    /*
+    Seems to roughly correlate with zTotal?
+    */
+} MTTouch;
+
+
