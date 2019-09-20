@@ -15,7 +15,7 @@ The data will display to the terminal window. To quit, input q (press q then ent
     $ ./touchRecorder > outputFileName.txt
 Note that no output will appear in the terminal window. It is still saving to the specified file, so remember to quit the program!
 
-WARNING: This will save a LOT of data (several kilobytes within several seconds). Run this script for only a couple of minutes at a time to avoid running out of disk space.
+WARNING: This will save a LOT of data (several kilobytes within several seconds).
 
 NOTE: If you cannot run the executable touchRecorder, use
     $ chmod u+x touchRecorder
